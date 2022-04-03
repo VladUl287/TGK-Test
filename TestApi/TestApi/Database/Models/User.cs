@@ -6,7 +6,11 @@ namespace TestApi.Database.Models
     {
         public int Id { get; set; }
         public string Email { get; set; } = string.Empty;
+
+        [JsonIgnore]
         public string Password { get; set; } = string.Empty;
+
+        [JsonIgnore]
         public ICollection<PersonalAccount> PersonalAccounts { get; set; }
     }
 }

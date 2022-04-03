@@ -1,14 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using TestApi.Database;
 using TestApi.Database.Models;
+using TestApi.Infrastructure.Exctension;
 
 namespace TestApi.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/report")]
     public class ReportController : ControllerBase
@@ -20,13 +19,16 @@ namespace TestApi.Controllers
             this.dbContext = dbContext;
         }
 
-        [HttpGet("{id:int}")]
-        public async Task<IEnumerable<Report>> GetAll(int id)
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Report>))]
+        public async Task<IActionResult> GetAll()
         {
+            var userId = User.GetLoggedInUserId<int>();
+
             var reports = await dbContext.Reports
                 .Include(e => e.User)
                 .Include(e => e.ToUser)
-                .Where(e => e.UserId == id || e.ToUserId == id)
+                .Where(e => e.UserId == userId || e.ToUserId == userId)
                 .AsNoTracking()
                 .ToListAsync();
 
@@ -39,7 +41,7 @@ namespace TestApi.Controllers
 
             //reports.AddRange(fromReports);
 
-            return reports;
+            return Ok(reports);
         }
     }
 }

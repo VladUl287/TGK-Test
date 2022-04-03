@@ -6,8 +6,13 @@ namespace TestApi.Services.Contracts
     public interface IAccountService
     {
         Task<IEnumerable<PersonalAccount>> Get(int userId);
+
         Task<PersonalAccount?> CreateAccount(AccountModel account);
+
+        Task<PersonalAccount?> TopUp(TopUpModel topUpModel);
+
         Task<PersonalAccount?> Convert(ConvertModel convertModel);
+
         Task<bool> Transfer(TransferModel transferModel);
     }
 }

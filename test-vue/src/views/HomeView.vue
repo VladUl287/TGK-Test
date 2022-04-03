@@ -1,16 +1,4 @@
 <template>
-  <!-- <div class="d-flex flex-column flex-shrink-0 p-3 user-select-none" style="width: 280px">
-    <span class="fs-4">Разделы</span>
-    <hr />
-    <ul class="nav nav-pills flex-column mb-auto">
-      <li class="nav-item">
-        <a href="#" class="nav-link active" aria-current="page"> Счета </a>
-      </li>
-      <li>
-        <a href="#" class="nav-link link-dark"> История </a>
-      </li>
-    </ul>
-  </div> -->
   <div class="container">
     <button
       type="button"
@@ -121,8 +109,7 @@ export default {
   },
 
   async mounted() {
-    let userId = this.$store.getters.StateUser.id;
-    await this.GetAccounts(userId);
+    await this.GetAccounts();
   },
 
   methods: {
@@ -132,8 +119,7 @@ export default {
       this.form.value = +this.form.value;
       this.form.currency = +this.form.currency;
       await this.CreateAccount(this.form);
-      let userId = this.$store.getters.StateUser.id;
-      this.GetAccounts(userId);
+      this.GetAccounts();
     },
   },
 };

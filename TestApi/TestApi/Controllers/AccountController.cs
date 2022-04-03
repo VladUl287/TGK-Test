@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using TestApi.Database.Models;
 using TestApi.Infrastructure.Exctension;
 using TestApi.Services.Contracts;
@@ -21,7 +20,8 @@ namespace TestApi.Controllers
         }
 
         [HttpGet("accounts")]
-        public async Task<ActionResult<IEnumerable<PersonalAccount>>> Get()
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<PersonalAccount>))]
+        public async Task<IActionResult> Get()
         {
             var userId = User.GetLoggedInUserId<int>();
 
@@ -29,6 +29,8 @@ namespace TestApi.Controllers
         }
 
         [HttpPost("create")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PersonalAccount))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create([FromBody] AccountModel account)
         {
             account.UserId = User.GetLoggedInUserId<int>();
@@ -42,7 +44,25 @@ namespace TestApi.Controllers
             return Ok(personalAccount);
         }
 
+        [HttpPost("topup")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PersonalAccount))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Convert([FromBody] TopUpModel topUpModel)
+        {
+            topUpModel.UserId = User.GetLoggedInUserId<int>();
+            var account = await accountService.TopUp(topUpModel);
+
+            if (account is null)
+            {
+                return BadRequest("Ошибка пополнения счёта");
+            }
+
+            return Ok(account);
+        }
+
         [HttpPost("transfer")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Transfer([FromBody] TransferModel transfer)
         {
             transfer.UserId = User.GetLoggedInUserId<int>();
@@ -57,6 +77,8 @@ namespace TestApi.Controllers
         }
 
         [HttpPost("convert")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PersonalAccount))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Convert([FromBody] ConvertModel convertModel)
         {
             convertModel.UserId = User.GetLoggedInUserId<int>();

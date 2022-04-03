@@ -1,16 +1,19 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-using TestApi.Database.Models;
+using TestApi.Infrastructure.Attribute;
 
 namespace TestApi.ViewModels
 {
     public class AccountModel
     {
-        [Required]
-        public decimal Value { get; set; }
-        [Required]
-        public int CurrencyId { get; set; }
         [JsonIgnore]
         public int UserId { get; set; }
+
+        [Required]
+        [MinValue(0)]
+        public decimal Value { get; set; }
+
+        [Required]
+        public int CurrencyId { get; set; }
     }
 }

@@ -70,6 +70,21 @@ namespace TestApi.Database
             {
                 entity.HasKey(e => e.Id);
 
+                entity.Property(e => e.DigitalСode)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.LetterCode)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(255);
+
+                entity.Property(e => e.Sign)
+                   .IsRequired();
+
                 entity.HasData(new Currency[]
                 {
                     new Currency

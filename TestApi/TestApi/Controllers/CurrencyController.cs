@@ -1,15 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TestApi.Database;
 using TestApi.Database.Models;
 
 namespace TestApi.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class CurrencyController : ControllerBase
@@ -22,11 +19,14 @@ namespace TestApi.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Currency>>> GetAll()
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Currency>))]
+        public async Task<IActionResult> GetAll()
         {
-            return await dbContext.Currencies
+            var currencies = await dbContext.Currencies
                 .AsNoTracking()
                 .ToListAsync();
+
+            return Ok(currencies);
         }
     }
 }

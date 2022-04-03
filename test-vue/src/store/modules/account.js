@@ -9,8 +9,8 @@ const getters = {
     StateReports: state => state.reports
 };
 const actions = {
-    async GetAccounts({ commit }, userId) {
-        let result = await axios.get(`account/${userId}`)
+    async GetAccounts({ commit }) {
+        let result = await axios.get('account/accounts')
         await commit('setAccounts', result.data);
     },
     async CreateAccount(_, form) {

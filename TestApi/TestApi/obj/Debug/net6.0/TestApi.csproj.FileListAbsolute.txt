@@ -37,6 +37,5 @@ C:\Temp\TGK Tests\TestApi\TestApi\obj\Debug\net6.0\TestApi.genruntimeconfig.cach
 C:\Temp\TGK Tests\TestApi\TestApi\bin\Debug\net6.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 C:\Temp\TGK Tests\TestApi\TestApi\bin\Debug\net6.0\Microsoft.IdentityModel.Protocols.dll
 C:\Temp\TGK Tests\TestApi\TestApi\bin\Debug\net6.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
-C:\Temp\TGK Tests\TestApi\TestApi\bin\Debug\net6.0\libman.json
 C:\Temp\TGK Tests\TestApi\TestApi\bin\Debug\net6.0\AutoMapper.dll
 C:\Temp\TGK Tests\TestApi\TestApi\bin\Debug\net6.0\AutoMapper.Extensions.Microsoft.DependencyInjection.dll

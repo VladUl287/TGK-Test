@@ -16,7 +16,9 @@ namespace TestApi.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromForm] LoginModel login)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Login([FromForm] AuthModel login)
         {
             var userModel = await authService.Login(login);
 
@@ -25,25 +27,31 @@ namespace TestApi.Controllers
                 return BadRequest("Неверные email или пароль.");
             }
 
-            Response.Cookies.Append("token", userModel.Token);
+            Response.Cookies.Append("token", userModel.Token, new CookieOptions
+            {
+                Expires = new DateTimeOffset(DateTime.UtcNow.AddDays(1))
+            });
 
             return Ok(userModel);
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromForm] RegisterModel register)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Register([FromForm] AuthModel register)
         {
             var user = await authService.Register(register);
 
             if (user is null)
             {
-                return BadRequest(new { error = "Пользователь с таким email уже существует." });
+                return BadRequest("Пользователь с таким email уже существует.");
             }
 
             return Created("Register", new { user.Id });
         }
 
         [HttpPost("logout")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult Logout()
         {
             Response.Cookies.Delete("token");

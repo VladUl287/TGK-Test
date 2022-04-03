@@ -12,7 +12,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors();
 builder.Services.AddControllers();
-
 builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddDbContext<DatabaseContext>(options =>
 {
@@ -22,6 +21,7 @@ builder.Services.AddDbContext<DatabaseContext>(options =>
 var issuer = builder.Configuration["Token:Issuer"];
 var audience = builder.Configuration["Token:Audience"];
 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Token:Secret"]));
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
   .AddJwtBearer(options =>
   {
@@ -90,7 +90,7 @@ app.UseCookiePolicy(new CookiePolicyOptions
 {
     MinimumSameSitePolicy = SameSiteMode.None,
     HttpOnly = HttpOnlyPolicy.Always,
-    Secure = CookieSecurePolicy.Always,
+    Secure = CookieSecurePolicy.Always
 });
 
 app.UseCors(opt =>

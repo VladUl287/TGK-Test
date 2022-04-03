@@ -12,6 +12,7 @@
         public Guid ToPersonalAccountId { get; set; }
         public PersonalAccount ToPersonalAccount { get; set; }
         public decimal Value { get; set; }
+        public int CurrencyId { get; set; }
         public Currency Currency { get; set; }
         public DateTime DateTransfer { get; set; }
     }
