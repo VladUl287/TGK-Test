@@ -2,11 +2,13 @@ import axios from 'axios';
 
 const state = {
     accounts: [],
-    reports: []
+    reports: [],
+    currencies: []
 };
 const getters = {
     StateAccounts: state => state.accounts,
-    StateReports: state => state.reports
+    StateReports: state => state.reports,
+    StateCurrencies: state => state.currencies
 };
 const actions = {
     async GetAccounts({ commit }) {
@@ -19,14 +21,21 @@ const actions = {
     async Transfer(_, form) {
         await axios.post('account/transfer', form)
     },
-    async GetReports({ commit }, userId) {
-        let result = await axios.get(`report/${userId}`)
+    async GetReports({ commit }) {
+        let result = await axios.get('report')
         await commit('setReports', result.data);
+    },
+    async GetCurrencies({ commit }) {
+        let result = await axios.get('currency')
+        await commit('setCurrencies', result.data);
     },
 };
 const mutations = {
     setAccounts(state, accounts) {
         state.accounts = accounts;
+    },
+    setCurrencies(state, currencies) {
+        state.currencies = currencies;
     },
     setReports(state, reports) {
         state.reports = reports;

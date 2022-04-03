@@ -15,7 +15,7 @@
     <hr />
     <ul class="nav nav-pills flex-column mb-auto">
       <li class="nav-item">
-        <router-link to="/" class="nav-link active" aria-current="page">
+        <router-link to="/" class="nav-link" active-class="active">
           <svg class="bi me-2" width="16" height="16">
             <use xlink:href="#home" />
           </svg>
@@ -23,7 +23,7 @@
         </router-link>
       </li>
       <li>
-        <router-link to="/reports" class="nav-link link-dark">
+        <router-link to="/reports" class="nav-link" active-class="active">
           <svg class="bi me-2" width="16" height="16">
             <use xlink:href="#speedometer2" />
           </svg>

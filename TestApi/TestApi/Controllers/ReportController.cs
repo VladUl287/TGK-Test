@@ -26,8 +26,7 @@ namespace TestApi.Controllers
             var userId = User.GetLoggedInUserId<int>();
 
             var reports = await dbContext.Reports
-                .Include(e => e.User)
-                .Include(e => e.ToUser)
+                .Include(e => e.Currency)
                 .Where(e => e.UserId == userId || e.ToUserId == userId)
                 .AsNoTracking()
                 .ToListAsync();

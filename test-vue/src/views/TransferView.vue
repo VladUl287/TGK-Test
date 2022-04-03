@@ -1,50 +1,91 @@
 <template>
-  <div>
+  <div class="container mt-3">
     <form @submit.prevent="transfer">
-      <input type="text" name="fromAccount" v-model="form.fromAccountId" />
-      <input type="text" name="toAccount" v-model="form.toAccountId" />
-      <input type="text" name="value" v-model="form.value" />
-      <button type="submit">Send</button>
+      <div class="form-group">
+        <label>Списать со счёта</label>
+        <select class="form-select" v-model="form.fromAccountNumber">
+          <option
+            v-for="(account, index) in accounts"
+            :key="index"
+            :value="account.number"
+          >
+            <p>{{ account.number }}</p>
+          </option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Счёт зачисления</label>
+        <input
+          type="text"
+          name="toAccount"
+          class="form-control"
+          v-model="form.toAccountNumber"
+        />
+      </div>
+      <div class="form-group">
+        <label>Сумма</label>
+        <input
+          type="number"
+          name="value"
+          class="form-control"
+          v-model="form.value"
+        />
+      </div>
+      <div class="form-group">
+        <button type="submit" class="btn btn-success d-block mt-2">
+          Перевести
+        </button>
+      </div>
     </form>
-    <div v-for="(error, index) in errors" :key="index">
-      <div>
+    <div v-for="(error, index) in errors" :key="index" class="mt-3">
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
         {{ error }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { useRoute } from "vue-router";
-import { mapActions } from "vuex";
+import { computed, onMounted, ref } from "@vue/runtime-core";
+import { useRoute, useRouter } from "vue-router";
+import { useStore } from "vuex";
 
 export default {
-  name: "TransferView",
-  mounted() {
+  setup() {
     const route = useRoute();
-    this.form.fromAccountId = route.params.id;
-  },
+    const store = useStore();
+    const router = useRouter();
 
-  data() {
-    return {
-      form: {
-        fromAccountId: "",
-        toAccountId: "",
-        value: 0,
-      },
-      errors: [],
-    };
-  },
+    const form = ref({
+      fromAccountNumber: "",
+      toAccountNumber: "",
+      value: 0,
+    });
+    const errors = ref([]);
 
-  methods: {
-    ...mapActions(["Transfer"]),
-    async transfer() {
+    const accounts = computed(() => store.getters.StateAccounts);
+
+    onMounted(() => {
+      form.value.fromAccountNumber = route.params.id;
+    });
+
+    const transfer = async () => {
       try {
-        await this.Transfer(this.form);
+        errors.value = [];
+        await store.dispatch("Transfer", form.value);
+        router.push("/");
       } catch {
-        alert("error");
+        errors.value.push("Ошибка перевода средств.");
       }
-    },
+    };
+    
+    return {
+      form,
+      errors,
+      accounts,
+      transfer,
+    };
   },
 };
 </script>

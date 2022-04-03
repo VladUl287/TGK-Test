@@ -1,40 +1,50 @@
 <template>
-  <div>
-      <div class="card mb-2" v-for="report of reports" :key="report.id">
-        <div class="card-header">
-          Перевод {{ report.toPersonalAccountId }}
-        </div>
-        <div class="card-body">
-          <h5 class="card-title">{{ report.value }} {{ report.currency == 0 ? "Руб." : "Усл.ед" }}</h5>
-          <p class="card-text">
-            Отправлено со счёта: {{report.personalAccountId}}
-          </p>
-        </div>
-        <div class="card-footer text-muted">{{report.dateTransfer}}</div>
+  <div class="container vh-100 overflow-auto pt-2">
+    <div class="card mb-2" v-for="report of reports" :key="report.id">
+      <div class="card-header">Перевод: {{ report.id }}</div>
+      <div class="card-body">
+        <h5 class="card-title">
+          {{ report.value }} {{ report.currency.sign }}
+        </h5>
+        <p class="card-text">
+          Отправлено со счёта: {{ report.toPersonalAccountId }}
+        </p>
+        <p class="card-text">
+          Cчёт зачисления: {{ report.toPersonalAccountId }}
+        </p>
       </div>
+      <div class="card-footer text-muted">
+        {{ format_date(report.dateTransfer) }}
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-import { mapActions } from "vuex";
+import moment from "moment";
+import { useStore } from "vuex";
+import { computed, onMounted } from "@vue/runtime-core";
+
 export default {
-  name: "ReportView",
-  computed: {
-    reports() {
-      return this.$store.getters.StateReports;
-    },
-  },
+  setup() {
+    const store = useStore();
 
-  mounted() {
-    let userId = this.$store.getters.StateUser.id;
-    this.GetReports(userId);
-  },
+    const reports = computed(() => store.getters.StateReports);
 
-  methods: {
-    ...mapActions(["GetReports"]),
+    onMounted(async () => {
+      await store.dispatch("GetReports");
+    });
+
+    const format_date = (value) => {
+      if (value) {
+        return moment(String(value)).locale("ru").format("MM/DD/YYYY hh:mm");
+      }
+    };
+
+    return {
+      reports,
+      format_date,
+    };
   },
 };
 </script>
-
-<style>
-</style>

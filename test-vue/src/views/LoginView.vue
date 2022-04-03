@@ -1,20 +1,20 @@
 <template>
-  <div class="container">
+  <div class="container mt-5">
     <div class="row">
       <div class="col-md-5 mx-auto border rounded-3">
         <div class="col-md-12 my-3 text-center">
           <h2>Войти</h2>
         </div>
-        <form @submit.prevent="submit">
+        <form @submit.prevent="submit" class="user-select-none">
           <div class="form-group">
             <input
               type="email"
               class="form-control"
               placeholder="Введите email"
-              v-model="v$.form.email.$model"
-              :class="{ 'is-invalid': v$.form.email.$errors.length }"
+              v-model="validate.form.email.$model"
+              :class="{ 'is-invalid': validate.form.email.$errors.length }"
             />
-            <div class="invalid-feedback" v-if="v$.form.email.$error">
+            <div class="invalid-feedback" v-if="validate.form.email.$error">
               Некорректный email
             </div>
           </div>
@@ -23,10 +23,10 @@
               type="password"
               class="form-control"
               placeholder="Введите пароль"
-              v-model="v$.form.password.$model"
-              :class="{ 'is-invalid': v$.form.password.$errors.length }"
+              v-model="validate.form.password.$model"
+              :class="{ 'is-invalid': validate.form.password.$errors.length }"
             />
-            <div class="invalid-feedback" v-if="v$.form.password.$error">
+            <div class="invalid-feedback" v-if="validate.form.password.$error">
               Пароль не менее 6-ти символов
             </div>
           </div>
@@ -34,7 +34,7 @@
             <button
               type="submit"
               class="btn btn-primary w-50"
-              :disabled="v$.form.$invalid"
+              :disabled="validate.form.$invalid"
             >
               Войти
             </button>
@@ -44,7 +44,7 @@
               <hr class="hr-or" />
               <p class="text-center">
                 Нет аккаунта?
-                <router-link to="/register">Заркгистрироваться</router-link>
+                <router-link to="/register">Зарегистрироваться</router-link>
               </p>
             </div>
           </div>
@@ -55,36 +55,37 @@
 </template>
 
 <script>
-import { mapActions } from "vuex";
+import { useStore } from "vuex";
 import useVuelidate from "@vuelidate/core";
 import { required, email, minLength } from "@vuelidate/validators";
+import { ref } from "@vue/reactivity";
+import { useRouter } from "vue-router";
 
 export default {
-  name: "LoginView",
-
   setup() {
-    return { v$: useVuelidate() };
-  },
+    const validate = useVuelidate();
+    const router = useRouter();
+    const store = useStore();
 
-  data() {
-    return {
-      form: {
-        email: "",
-        password: "",
-      },
-    };
-  },
+    const form = ref({
+      email: "",
+      password: "",
+    });
 
-  methods: {
-    ...mapActions(["Login"]),
-    async submit() {
+    const submit = async () => {
       try {
-        await this.Login(this.form);
-        // this.$router.push("/");
+        await store.dispatch("Login", form.value);
+        router.push("/");
       } catch (error) {
         alert("Неверный логин или пароль.");
       }
-    },
+    };
+
+    return {
+      form,
+      validate,
+      submit,
+    };
   },
 
   validations() {
@@ -103,10 +104,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.container {
-  margin-top: 5%;
-  user-select: none;
-}
-</style>
