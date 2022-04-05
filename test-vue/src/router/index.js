@@ -5,6 +5,8 @@ import RegisterView from '../views/RegisterView.vue'
 import LoginView from '../views/LoginView.vue'
 import TransferView from '../views/TransferView.vue'
 import ReportView from '../views/ReportView.vue'
+import TopUpView from '../views/TopUpView.vue'
+import ConvertAccountView from '../views/ConvertAccountView.vue'
 
 const routes = [
   {
@@ -29,6 +31,18 @@ const routes = [
     path: '/transfer/:id',
     name: "Transfer",
     component: TransferView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/convert/:id',
+    name: "Convert",
+    component: ConvertAccountView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/topup/:id',
+    name: "TopUp",
+    component: TopUpView,
     meta: { requiresAuth: true },
   },
   {

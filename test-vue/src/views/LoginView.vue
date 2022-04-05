@@ -1,6 +1,6 @@
 <template>
-  <div class="container mt-5">
-    <div class="row">
+  <div class="container vh-100 d-flex align-items-center">
+    <div class="row w-100">
       <div class="col-md-5 mx-auto border rounded-3">
         <div class="col-md-12 my-3 text-center">
           <h2>Войти</h2>
@@ -11,10 +11,10 @@
               type="email"
               class="form-control"
               placeholder="Введите email"
-              v-model="validate.form.email.$model"
-              :class="{ 'is-invalid': validate.form.email.$errors.length }"
+              v-model="v$.form.email.$model"
+              :class="{ 'is-invalid': v$.form.email.$errors.length }"
             />
-            <div class="invalid-feedback" v-if="validate.form.email.$error">
+            <div class="invalid-feedback" v-if="v$.form.email.$error">
               Некорректный email
             </div>
           </div>
@@ -23,10 +23,10 @@
               type="password"
               class="form-control"
               placeholder="Введите пароль"
-              v-model="validate.form.password.$model"
-              :class="{ 'is-invalid': validate.form.password.$errors.length }"
+              v-model="v$.form.password.$model"
+              :class="{ 'is-invalid': v$.form.password.$errors.length }"
             />
-            <div class="invalid-feedback" v-if="validate.form.password.$error">
+            <div class="invalid-feedback" v-if="v$.form.password.$error">
               Пароль не менее 6-ти символов
             </div>
           </div>
@@ -34,7 +34,7 @@
             <button
               type="submit"
               class="btn btn-primary w-50"
-              :disabled="validate.form.$invalid"
+              :disabled="v$.form.$invalid"
             >
               Войти
             </button>
@@ -63,7 +63,7 @@ import { useRouter } from "vue-router";
 
 export default {
   setup() {
-    const validate = useVuelidate();
+    const v$ = useVuelidate();
     const router = useRouter();
     const store = useStore();
 
@@ -77,13 +77,13 @@ export default {
         await store.dispatch("Login", form.value);
         router.push("/");
       } catch (error) {
-        alert("Неверный логин или пароль.");
+        alert("Неверный логин или пароль." + error);
       }
     };
 
     return {
+      v$,
       form,
-      validate,
       submit,
     };
   },

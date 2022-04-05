@@ -16,6 +16,7 @@ namespace TestApi.Database
         public DbSet<Currency> Currencies { get; set; }
         public DbSet<Report> Reports { get; set; }
         public DbSet<ExchangeRate> ExchangeRates { get; set; }
+        public DbSet<Token> Tokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

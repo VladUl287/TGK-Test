@@ -9,6 +9,7 @@ namespace TestApi.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService authService;
+        private const string REFRESH_TOKEN = "refresh_token";
 
         public AuthController(IAuthService authService)
         {
@@ -20,19 +21,19 @@ namespace TestApi.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Login([FromForm] AuthModel login)
         {
-            var userModel = await authService.Login(login);
+            var loginResult = await authService.Login(login);
 
-            if (userModel is null)
+            if (loginResult is null)
             {
                 return BadRequest("Неверные email или пароль.");
             }
 
-            Response.Cookies.Append("token", userModel.Token, new CookieOptions
+            Response.Cookies.Append(REFRESH_TOKEN, loginResult.RefreshToken, new CookieOptions
             {
-                Expires = new DateTimeOffset(DateTime.UtcNow.AddDays(1))
+                Expires = new DateTimeOffset(DateTime.UtcNow.AddDays(30))
             });
 
-            return Ok(userModel);
+            return Ok(loginResult);
         }
 
         [HttpPost("register")]
@@ -52,11 +53,38 @@ namespace TestApi.Controllers
 
         [HttpPost("logout")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public IActionResult Logout()
+        public async Task<IActionResult> Logout()
         {
-            Response.Cookies.Delete("token");
+            var refreshToken = Request.Cookies[REFRESH_TOKEN];
+
+            if (refreshToken is not null)
+            {
+                await authService.Logout(refreshToken);
+
+                Response.Cookies.Delete(REFRESH_TOKEN);
+            }
 
             return NoContent();
+        }
+
+        [HttpPost("refresh")]
+        public async Task<IActionResult> Refresh()
+        {
+            var cookieToken = Request.Cookies[REFRESH_TOKEN];
+
+            var result = await authService.Refresh(cookieToken);
+
+            if (result is null)
+            {
+                return Unauthorized();
+            }
+
+            Response.Cookies.Append(REFRESH_TOKEN, result.RefreshToken, new CookieOptions
+            {
+                Expires = new DateTimeOffset(DateTime.UtcNow.AddDays(30))
+            });
+
+            return Ok(result);
         }
     }
 }

@@ -20,7 +20,7 @@ builder.Services.AddDbContext<DatabaseContext>(options =>
 
 var issuer = builder.Configuration["Token:Issuer"];
 var audience = builder.Configuration["Token:Audience"];
-var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Token:Secret"]));
+var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Token:AccessSecret"]));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
   .AddJwtBearer(options =>
@@ -34,20 +34,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
           ValidAudience = audience,
           ValidateLifetime = true,
           ValidateIssuerSigningKey = true,
+          ClockSkew = TimeSpan.Zero,
           IssuerSigningKey = key,
-      };
-      options.Events = new JwtBearerEvents
-      {
-          OnMessageReceived = context =>
-          {
-              context.Token = context.Request.Cookies["token"] ?? context.Token;
-              return Task.CompletedTask;
-          }
       };
   });
 
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 
 builder.Services.AddEndpointsApiExplorer();

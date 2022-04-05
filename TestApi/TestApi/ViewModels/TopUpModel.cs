@@ -15,8 +15,5 @@ namespace TestApi.ViewModels
         [Required]
         [MinValue(0)]
         public decimal Value { get; set; }
-
-        [Required]
-        public int CurrencyId { get; set; }
     }
 }

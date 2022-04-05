@@ -9,7 +9,6 @@
       user-select-none
     "
     style="width: 300px"
-    v-if="isLoggedIn"
   >
     <span class="fs-4">Навигация</span>
     <hr />
@@ -62,18 +61,21 @@
 </template>
 
 <script>
+import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 export default {
-  name: "NavBar",
-  computed: {
-    isLoggedIn() {
-      return this.$store.getters.isAuthenticated;
-    },
-  },
-  methods: {
-    async logout() {
-      await this.$store.dispatch("Logout");
-      this.$router.push("/login");
-    },
+  setup() {
+    const store = useStore();
+    const router = useRouter();
+
+    const logout = async () => {
+      await store.dispatch("Logout");
+      router.push("/login");
+    };
+
+    return {
+      logout,
+    };
   },
 };
 </script>

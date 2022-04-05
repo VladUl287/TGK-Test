@@ -1,12 +1,12 @@
 <template>
   <div class="container mt-3">
-    <form @submit.prevent="transfer">
+    <form @submit.prevent="convertAccount">
       <div class="form-group">
-        <label>Списать со счёта</label>
-        <select class="form-select" v-model="form.fromAccountNumber">
+        <label>Cчёт</label>
+        <select class="form-select" v-model="form.accountNumber">
           <option
-            v-for="(account, index) in accounts"
-            :key="index"
+            v-for="account in accounts"
+            :key="account.number"
             :value="account.number"
           >
             <p>{{ account.number }}</p>
@@ -14,33 +14,32 @@
         </select>
       </div>
       <div class="form-group">
-        <label>Счёт зачисления</label>
-        <input
-          type="text"
-          name="toAccount"
-          class="form-control"
-          v-model="form.toAccountNumber"
-        />
-      </div>
-      <div class="form-group">
-        <label>Сумма</label>
-        <input
-          type="number"
-          name="value"
-          class="form-control"
-          v-model="form.value"
-        />
+        <label>Валюта</label>
+        <select class="form-select" v-model="form.currencyId">
+          <option
+            v-for="(currency, index) in cirrencies"
+            :key="index"
+            :value="currency.id"
+          >
+            <p>{{ currency.name }}</p>
+          </option>
+        </select>
       </div>
       <div class="form-group">
         <button type="submit" class="btn btn-success d-block mt-2">
-          Перевести
+          Конвертировать
         </button>
       </div>
     </form>
     <div v-for="(error, index) in errors" :key="index" class="mt-3">
       <div class="alert alert-danger alert-dismissible fade show" role="alert">
         {{ error }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
       </div>
     </div>
   </div>
@@ -58,34 +57,36 @@ export default {
     const router = useRouter();
 
     const form = ref({
-      fromAccountNumber: "",
-      toAccountNumber: "",
-      value: 0,
+      accountNumber: "",
+      currencyId: 0,
     });
     const errors = ref([]);
 
     const accounts = computed(() => store.getters.StateAccounts);
+    const cirrencies = computed(() => store.getters.StateCurrencies);
 
     onMounted(async () => {
-      form.value.fromAccountNumber = route.params.id;
+      form.value.accountNumber = route.params.id;
       await store.dispatch("GetAccounts");
+      await store.dispatch("GetCurrencies");
     });
 
-    const transfer = async () => {
+    const convertAccount = async () => {
       try {
         errors.value = [];
-        await store.dispatch("Transfer", form.value);
+        await store.dispatch("ConvertAccount", form.value);
         router.push("/");
       } catch {
-        errors.value.push("Ошибка перевода средств.");
+        errors.value.push("Ошибка конвертации счёта.");
       }
     };
-    
+
     return {
       form,
       errors,
       accounts,
-      transfer,
+      cirrencies,
+      convertAccount,
     };
   },
 };

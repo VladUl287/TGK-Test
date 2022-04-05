@@ -62,21 +62,6 @@ namespace TestApi.Services
                 return null;
             }
 
-            if (topUpModel.CurrencyId != account.CurrencyId)
-            {
-                var rate = await dbContext.ExchangeRates
-                                .Where(e => e.CurrencyId == topUpModel.CurrencyId && e.SecondCurrencyId == account.CurrencyId)
-                                .Select(e => e.Rate)
-                                .FirstOrDefaultAsync();
-
-                if (rate == default)
-                {
-                    return null;
-                }
-
-                topUpModel.Value *= rate;
-            }
-
             account.Value += topUpModel.Value;
             await dbContext.SaveChangesAsync();
 

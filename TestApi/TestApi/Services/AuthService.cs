@@ -9,17 +9,17 @@ namespace TestApi.Services
     public class AuthService : IAuthService
     {
         private readonly DatabaseContext dbContext;
-        private readonly ITokenService tokenService;
+        private readonly IJwtService jwtService;
         private readonly IConfiguration configuration;
 
-        public AuthService(DatabaseContext dbContext, ITokenService tokenService, IConfiguration configuration)
+        public AuthService(DatabaseContext dbContext, IJwtService tokenService, IConfiguration configuration)
         {
             this.dbContext = dbContext;
-            this.tokenService = tokenService;
+            this.jwtService = tokenService;
             this.configuration = configuration;
         }
 
-        public async Task<UserModel?> Login(AuthModel login)
+        public async Task<LoginSuccess?> Login(AuthModel login)
         {
             var user = await dbContext.Users
                 .AsNoTracking()
@@ -38,16 +38,27 @@ namespace TestApi.Services
                 return null;
             }
 
-            var key = configuration.GetValue<string>("Token:Secret");
+            var accessTokenKey = configuration.GetValue<string>("Token:AccessSecret");
+            var refreshTokenKey = configuration.GetValue<string>("Token:RefreshSecret");
             var issuer = configuration.GetValue<string>("Token:Issuer");
             var audience = configuration.GetValue<string>("Token:Audience");
             var lifeTime = int.Parse(configuration.GetValue<string>("Token:LifeTime"));
 
-            return new UserModel
+            var accessToken = jwtService.Generate(user, accessTokenKey, issuer, audience, DateTime.UtcNow.AddMinutes(lifeTime));
+            var refreshToken = jwtService.Generate(user, refreshTokenKey, issuer, audience, DateTime.UtcNow.AddDays(lifeTime));
+
+            await dbContext.Tokens.AddAsync(new Token
             {
-                Id = user.Id,
+                UserId = user.Id,
+                RefreshToken = refreshToken
+            });
+            await dbContext.SaveChangesAsync();
+
+            return new LoginSuccess
+            {
                 Email = user.Email,
-                Token = tokenService.Generate(user, key, issuer, audience, DateTime.Now.AddDays(lifeTime))
+                AccessToken = accessToken,
+                RefreshToken = refreshToken
             };
         }
 
@@ -76,6 +87,68 @@ namespace TestApi.Services
             {
                 Id = user.Id,
                 Email = user.Email
+            };
+        }
+
+        public async Task Logout(string token)
+        {
+            var dbToken = await dbContext.Tokens
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => e.RefreshToken == token);
+
+            if (dbToken is null)
+            {
+                return;
+            }
+
+            dbContext.Tokens.Remove(dbToken);
+            await dbContext.SaveChangesAsync();
+        }
+
+        public async Task<LoginSuccess?> Refresh(string token)
+        {
+            if (string.IsNullOrEmpty(token))
+            {
+                return null;
+            }
+
+            var dbToken = await dbContext.Tokens
+               .Include(e => e.User)
+               .AsNoTracking()
+               .FirstOrDefaultAsync(x => x.RefreshToken == token);
+
+            if (dbToken is null)
+            {
+                return null;
+            }
+
+            var accessSecretKey = configuration.GetValue<string>("Token:AccessSecret");
+            var refreshSecretKey = configuration.GetValue<string>("Token:RefreshSecret");
+            var issuer = configuration.GetValue<string>("Token:Issuer");
+            var audience = configuration.GetValue<string>("Token:Audience");
+            var lifeTime = int.Parse(configuration.GetValue<string>("Token:LifeTime"));
+
+            var valid = jwtService.ValidateToken(dbToken.RefreshToken, refreshSecretKey, issuer, audience);
+
+            if (!valid)
+            {
+                await Logout(dbToken.RefreshToken);
+
+                return null;
+            }
+
+            var accessToken = jwtService.Generate(dbToken.User, accessSecretKey, issuer, audience, DateTime.UtcNow.AddMinutes(lifeTime));
+            var refreshToken = jwtService.Generate(dbToken.User, refreshSecretKey, issuer, audience, DateTime.UtcNow.AddDays(lifeTime));
+
+            dbToken.RefreshToken = refreshToken;
+            dbContext.Tokens.Update(dbToken);
+            await dbContext.SaveChangesAsync();
+
+            return new LoginSuccess 
+            {
+                Email = dbToken.User.Email,
+                AccessToken = accessToken, 
+                RefreshToken = refreshToken 
             };
         }
     }

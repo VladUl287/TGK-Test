@@ -1,6 +1,6 @@
 <template>
-<div class="container">
-    <div class="row">
+  <div class="container vh-100 d-flex align-items-center">
+    <div class="row w-100">
       <div class="col-md-5 mx-auto border rounded-3">
         <div class="col-md-12 my-3 text-center">
           <h2>Регистрация</h2>
@@ -55,36 +55,37 @@
 </template>
 
 <script>
-import { mapActions } from "vuex";
 import useVuelidate from "@vuelidate/core";
 import { required, email, minLength } from "@vuelidate/validators";
+import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
+import { ref } from '@vue/reactivity';
 
 export default {
-  name: "RegisterView",
-
   setup() {
-    return { v$: useVuelidate() };
-  },
+    const v$ = useVuelidate();
+    const router = useRouter();
+    const store = useStore();
 
-  data() {
-    return {
-      form: {
-        email: "",
-        password: "",
-      },
-    };
-  },
+    const form = ref({
+      email: "",
+      password: "",
+    });
 
-  methods: {
-    ...mapActions(["Register"]),
-    async submit() {
+    const submit = async () => {
       try {
-        await this.Register(this.form);
-        this.$router.push("/login");
+        await store.dispatch("Register", form.value);
+        router.push("/login");
       } catch (error) {
         alert("Ошибка регистрации.");
       }
-    },
+    };
+
+    return {
+      v$,
+      form,
+      submit,
+    };
   },
 
   validations() {
@@ -103,10 +104,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.container {
-  margin-top: 5%;
-  user-select: none;
-}
-</style>

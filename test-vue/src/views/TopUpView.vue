@@ -1,9 +1,9 @@
 <template>
   <div class="container mt-3">
-    <form @submit.prevent="transfer">
+    <form @submit.prevent="topUpAccount">
       <div class="form-group">
-        <label>Списать со счёта</label>
-        <select class="form-select" v-model="form.fromAccountNumber">
+        <label>Пополнить счёт</label>
+        <select class="form-select" v-model="form.accountNumber">
           <option
             v-for="(account, index) in accounts"
             :key="index"
@@ -12,15 +12,6 @@
             <p>{{ account.number }}</p>
           </option>
         </select>
-      </div>
-      <div class="form-group">
-        <label>Счёт зачисления</label>
-        <input
-          type="text"
-          name="toAccount"
-          class="form-control"
-          v-model="form.toAccountNumber"
-        />
       </div>
       <div class="form-group">
         <label>Сумма</label>
@@ -33,14 +24,19 @@
       </div>
       <div class="form-group">
         <button type="submit" class="btn btn-success d-block mt-2">
-          Перевести
+          Пополнить
         </button>
       </div>
     </form>
     <div v-for="(error, index) in errors" :key="index" class="mt-3">
       <div class="alert alert-danger alert-dismissible fade show" role="alert">
         {{ error }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
       </div>
     </div>
   </div>
@@ -58,8 +54,7 @@ export default {
     const router = useRouter();
 
     const form = ref({
-      fromAccountNumber: "",
-      toAccountNumber: "",
+      accountNumber: "",
       value: 0,
     });
     const errors = ref([]);
@@ -67,25 +62,25 @@ export default {
     const accounts = computed(() => store.getters.StateAccounts);
 
     onMounted(async () => {
-      form.value.fromAccountNumber = route.params.id;
+      form.value.accountNumber = route.params.id;
       await store.dispatch("GetAccounts");
     });
 
-    const transfer = async () => {
+    const topUpAccount = async () => {
       try {
         errors.value = [];
-        await store.dispatch("Transfer", form.value);
+        await store.dispatch("TopUpAccount", form.value);
         router.push("/");
       } catch {
-        errors.value.push("Ошибка перевода средств.");
+        errors.value.push("Ошибка пополнения счёта.");
       }
     };
-    
+
     return {
       form,
       errors,
       accounts,
-      transfer,
+      topUpAccount,
     };
   },
 };

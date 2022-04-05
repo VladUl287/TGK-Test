@@ -8,5 +8,7 @@ export default new Vuex.Store({
         auth,
         account
     },
-    plugins: [createPersistedState()]
+    plugins: [createPersistedState({
+        paths: ['auth']
+    })]
 });

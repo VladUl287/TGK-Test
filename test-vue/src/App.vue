@@ -1,7 +1,7 @@
 <template>
   <div class="container-fluid">
     <div class="row flex-nowrap">
-      <NavBar />
+      <NavBar v-if="isLoggedIn" />
       <div class="col p-0">
         <router-view />
       </div>
@@ -11,8 +11,18 @@
 
 <script>
 import NavBar from "@/components/NavBar.vue";
+import { computed } from "@vue/runtime-core";
+import { useStore } from "vuex";
 export default {
-  name: "App",
+  setup() {
+    const store = useStore();
+
+    const isLoggedIn = computed(() => store.getters.isAuthenticated);
+
+    return {
+      isLoggedIn,
+    };
+  },
   components: {
     NavBar,
   },
