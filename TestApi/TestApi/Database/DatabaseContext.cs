@@ -20,6 +20,9 @@ namespace TestApi.Database
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            var accoindId = Guid.NewGuid();
+            var secAccoindId = Guid.NewGuid();
+
             modelBuilder.Entity<User>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -52,14 +55,14 @@ namespace TestApi.Database
                 {
                     new PersonalAccount
                     {
-                        Number = Guid.NewGuid(),
+                        Number = accoindId,
                         UserId = 1,
                         CurrencyId = 1,
                         Value = 2000
                     },
                     new PersonalAccount
                     {
-                        Number = Guid.NewGuid(),
+                        Number = secAccoindId,
                         UserId = 1,
                         CurrencyId = 2,
                         Value = 5000
@@ -107,6 +110,78 @@ namespace TestApi.Database
                 });
             });
 
+            modelBuilder.Entity<Report>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasData(new Report[]
+                {
+                    new Report
+                    {
+                        Id = 1,
+                        TransferValue = 235,
+                        AccountValue = 2235,
+                        DateTransfer = DateTime.UtcNow.AddMinutes(15),
+                        CurrencyId = 1,
+                        Credited = true,
+                        PersonalAccountId = accoindId,
+                        UserId = 1
+                    },
+                    new Report
+                    {
+                        Id = 2,
+                        TransferValue = 235,
+                        AccountValue = 2000,
+                        DateTransfer = DateTime.UtcNow.AddDays(5),
+                        CurrencyId = 2,
+                        PersonalAccountId = accoindId,
+                        UserId = 1
+                    },
+                    new Report
+                    {
+                        Id = 3,
+                        TransferValue = 45,
+                        AccountValue = 2045,
+                        DateTransfer = DateTime.UtcNow.AddDays(10),
+                        CurrencyId = 1,
+                        Credited = true,
+                        PersonalAccountId = accoindId,
+                        UserId = 1
+                    },
+                    new Report
+                    {
+                        Id = 4,
+                        TransferValue = 1500,
+                        AccountValue = 545,
+                        DateTransfer = DateTime.UtcNow.AddDays(15),
+                        CurrencyId = 2,
+                        PersonalAccountId = accoindId,
+                        UserId = 1
+                    },
+                    new Report
+                    {
+                        Id = 5,
+                        TransferValue = 5600,
+                        AccountValue = 6045,
+                        DateTransfer = DateTime.UtcNow.AddDays(20),
+                        CurrencyId = 2,
+                        Credited = true,
+                        PersonalAccountId = accoindId,
+                        UserId = 1
+                    },
+                    new Report
+                    {
+                        Id = 6,
+                        TransferValue = 435,
+                        AccountValue = 5610,
+                        DateTransfer = DateTime.UtcNow.AddDays(25),
+                        CurrencyId = 2,
+                        PersonalAccountId = accoindId,
+                        UserId = 1
+                    },
+                });
+            });
+
             modelBuilder.Entity<ExchangeRate>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -118,14 +193,16 @@ namespace TestApi.Database
                         Id = 1,
                         CurrencyId = 1,
                         SecondCurrencyId = 2,
-                        Rate = 0.012M
+                        //Rate = 0.012M
+                        Rate = 0.5M
                     },
                     new ExchangeRate
                     {
                         Id = 2,
                         CurrencyId = 2,
                         SecondCurrencyId = 1,
-                        Rate = 83.3333333M
+                        //Rate = 83.3333333M
+                        Rate = 2M
                     }
                 });
             });

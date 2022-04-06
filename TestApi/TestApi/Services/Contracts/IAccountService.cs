@@ -7,7 +7,7 @@ namespace TestApi.Services.Contracts
     {
         Task<IEnumerable<PersonalAccount>> Get(int userId);
 
-        Task<PersonalAccount?> CreateAccount(AccountModel account);
+        Task<PersonalAccount?> Create(AccountModel account);
 
         Task<PersonalAccount?> TopUp(TopUpModel topUpModel);
 

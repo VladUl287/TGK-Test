@@ -34,7 +34,7 @@ namespace TestApi.Controllers
         public async Task<IActionResult> Create([FromBody] AccountModel account)
         {
             account.UserId = User.GetLoggedInUserId<int>();
-            var personalAccount = await accountService.CreateAccount(account);
+            var personalAccount = await accountService.Create(account);
 
             if (personalAccount is null)
             {

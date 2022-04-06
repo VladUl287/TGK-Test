@@ -1,4 +1,5 @@
 import instance from '@/http';
+import axios from 'axios';
 
 const state = {
     email: null,
@@ -28,7 +29,7 @@ const actions = {
         await commit('logout')
     },
     async Refresh({ commit }) {
-        let result = await instance.post('auth/refresh');
+        let result = await axios.post('auth/refresh');
         await commit('setAuth', result.data);
     }
 };

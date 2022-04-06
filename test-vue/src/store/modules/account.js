@@ -27,8 +27,16 @@ const actions = {
     async TopUpAccount(_, form) {
         await instance.post('account/topup', form)
     },
-    async GetReports({ commit }) {
-        let result = await instance.get('report')
+    async GetReports({ commit }, filter) {
+        let query = '?';
+        if (filter) {
+            for (const [key, value] of Object.entries(filter)) {
+                if (value) {
+                    query += `${key}=${value}&`;
+                }
+            }
+        }
+        let result = await instance.get('report' + query)
         await commit('setReports', result.data);
     },
     async GetCurrencies({ commit }) {

@@ -21,7 +21,6 @@ builder.Services.AddDbContext<DatabaseContext>(options =>
 var issuer = builder.Configuration["Token:Issuer"];
 var audience = builder.Configuration["Token:Audience"];
 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Token:AccessSecret"]));
-
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
   .AddJwtBearer(options =>
   {
@@ -70,6 +69,7 @@ builder.Services.AddSwaggerGen(opt =>
 });
 
 var app = builder.Build();
+//AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 if (app.Environment.IsDevelopment())
 {

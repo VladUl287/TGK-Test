@@ -16,19 +16,16 @@ instance.interceptors.request.use((config) => {
     return config;
 });
 
-let refresh = false;
 instance.interceptors.response.use(undefined, async (error) => {
-    const original = error.config;
-    if (error.response.status === 401 && error.config && !refresh) {
-        refresh = true;
-        await store.dispatch('Refresh');
-        return axios.request(original);
-    } else if (error.response.status === 401 && refresh) {
-        refresh = false;
-        await store.dispatch('Logout')
-        return router.push('/login')
+    if (error.response.status === 401 && error.config && !error.config._isRetry) {
+        try {
+            await store.dispatch('Refresh');
+            return instance.request(error.config);
+        } catch {
+            await store.dispatch('Refresh');
+            router.push('/login');
+        }
     }
-    refresh = false;
     return Promise.reject(error);
 });
 

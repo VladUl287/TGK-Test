@@ -44,8 +44,8 @@ namespace TestApi.Services
             var audience = configuration.GetValue<string>("Token:Audience");
             var lifeTime = int.Parse(configuration.GetValue<string>("Token:LifeTime"));
 
-            var accessToken = jwtService.Generate(user, accessTokenKey, issuer, audience, DateTime.UtcNow.AddMinutes(lifeTime));
-            var refreshToken = jwtService.Generate(user, refreshTokenKey, issuer, audience, DateTime.UtcNow.AddDays(lifeTime));
+            var accessToken = jwtService.Generate(user, accessTokenKey, issuer, audience, DateTime.UtcNow.AddSeconds(lifeTime));
+            var refreshToken = jwtService.Generate(user, refreshTokenKey, issuer, audience, DateTime.UtcNow.AddSeconds(lifeTime * 2));
 
             await dbContext.Tokens.AddAsync(new Token
             {
@@ -137,8 +137,8 @@ namespace TestApi.Services
                 return null;
             }
 
-            var accessToken = jwtService.Generate(dbToken.User, accessSecretKey, issuer, audience, DateTime.UtcNow.AddMinutes(lifeTime));
-            var refreshToken = jwtService.Generate(dbToken.User, refreshSecretKey, issuer, audience, DateTime.UtcNow.AddDays(lifeTime));
+            var accessToken = jwtService.Generate(dbToken.User, accessSecretKey, issuer, audience, DateTime.UtcNow.AddSeconds(lifeTime));
+            var refreshToken = jwtService.Generate(dbToken.User, refreshSecretKey, issuer, audience, DateTime.UtcNow.AddSeconds(lifeTime * 2));
 
             dbToken.RefreshToken = refreshToken;
             dbContext.Tokens.Update(dbToken);

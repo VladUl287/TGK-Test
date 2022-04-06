@@ -8,5 +8,10 @@
         public int SecondCurrencyId { get; set; }
         public Currency SecondCurrency { get; set; }
         public decimal Rate { get; set; }
+
+        public decimal Exchange(decimal sum)
+        {
+            return sum * Rate;
+        }
     }
 }

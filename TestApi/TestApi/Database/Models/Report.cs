@@ -5,15 +5,13 @@
         public int Id { get; set; }
         public int UserId { get; set; }
         public User User { get; set; }
-        public int ToUserId { get; set; }
-        public User ToUser { get; set; }
         public Guid PersonalAccountId { get; set; }
         public PersonalAccount PersonalAccount { get; set; }
-        public Guid ToPersonalAccountId { get; set; }
-        public PersonalAccount ToPersonalAccount { get; set; }
-        public decimal Value { get; set; }
+        public decimal TransferValue { get; set; }
+        public decimal AccountValue { get; set; }
         public int CurrencyId { get; set; }
         public Currency Currency { get; set; }
+        public bool Credited { get; set; }
         public DateTime DateTransfer { get; set; }
     }
 }

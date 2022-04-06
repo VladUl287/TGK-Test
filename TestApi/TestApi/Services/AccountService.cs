@@ -27,7 +27,7 @@ namespace TestApi.Services
                 .ToListAsync();
         }
 
-        public async Task<PersonalAccount?> CreateAccount(AccountModel account)
+        public async Task<PersonalAccount?> Create(AccountModel account)
         {
             var count = await dbContext.PersonalAccounts
                 .CountAsync(e => e.UserId == account.UserId);
@@ -41,6 +41,7 @@ namespace TestApi.Services
 
             try
             {
+                personalAcc.DateCreate = DateTime.UtcNow;
                 await dbContext.PersonalAccounts.AddAsync(personalAcc);
                 await dbContext.SaveChangesAsync();
 
@@ -63,6 +64,19 @@ namespace TestApi.Services
             }
 
             account.Value += topUpModel.Value;
+            await dbContext.SaveChangesAsync();
+
+            var report = new Report
+            {
+                UserId = account.UserId,
+                PersonalAccountId = account.Number,
+                TransferValue = topUpModel.Value,
+                AccountValue = account.Value,
+                CurrencyId = account.CurrencyId,
+                DateTransfer = DateTime.UtcNow
+            };
+
+            await dbContext.Reports.AddRangeAsync(report);
             await dbContext.SaveChangesAsync();
 
             return account;
@@ -102,18 +116,27 @@ namespace TestApi.Services
                         toAccount.Value += value;
                         await dbContext.SaveChangesAsync();
 
-                        var report = new Report
+                        var fromUserReport = new Report
                         {
                             UserId = account.UserId,
-                            ToUserId = toAccount.UserId,
                             PersonalAccountId = account.Number,
-                            ToPersonalAccountId = toAccount.Number,
-                            Value = transferModel.Value,
+                            TransferValue = transferModel.Value,
+                            AccountValue = account.Value,
+                            CurrencyId = account.CurrencyId,
+                            DateTransfer = DateTime.UtcNow
+                        };
+                        var toUserReport = new Report
+                        {
+                            UserId = toAccount.UserId,
+                            PersonalAccountId = toAccount.Number,
+                            TransferValue = transferModel.Value,
+                            AccountValue = toAccount.Value,
+                            Credited = true,
                             CurrencyId = account.CurrencyId,
                             DateTransfer = DateTime.UtcNow
                         };
 
-                        await dbContext.Reports.AddAsync(report);
+                        await dbContext.Reports.AddRangeAsync(fromUserReport, toUserReport);
                         await dbContext.SaveChangesAsync();
 
                         await dbContext.Database.CommitTransactionAsync();

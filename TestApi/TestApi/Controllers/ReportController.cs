@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using TestApi.Database;
 using TestApi.Database.Models;
 using TestApi.Infrastructure.Exctension;
+using TestApi.ViewModels;
 
 namespace TestApi.Controllers
 {
@@ -21,26 +22,38 @@ namespace TestApi.Controllers
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Report>))]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] FilterModel filter)
         {
             var userId = User.GetLoggedInUserId<int>();
 
-            var reports = await dbContext.Reports
+            var reports = dbContext.Reports
                 .Include(e => e.Currency)
-                .Where(e => e.UserId == userId || e.ToUserId == userId)
-                .AsNoTracking()
-                .ToListAsync();
+                .Where(e => e.UserId == userId);
 
-            //var fromReports = await dbContext.Reports
-            //    .Include(e => e.User)
-            //    .Include(e => e.ToUser)
-            //    .Where(e => e.ToUserId == id && e.UserId != id)
-            //    .AsNoTracking()
-            //    .ToListAsync();
+            if (filter.AccountNumber != default)
+            {
+                reports = reports.Where(e => e.PersonalAccountId == filter.AccountNumber);
+            }
+            if (filter.StartDate != default)
+            {
+                reports = reports.Where(e => e.DateTransfer >= new DateTime(filter.StartDate.Date.Ticks, DateTimeKind.Utc));
+            }
+            if (filter.EndDate != default)
+            {
+                reports = reports.Where(e => e.DateTransfer <= new DateTime(filter.EndDate.Date.Ticks, DateTimeKind.Utc));
+            }
+            if (filter.CurrencyId != default)
+            {
+                reports = reports.Where(e => e.CurrencyId == filter.CurrencyId);
+            }
+            if (filter.Page != default && filter.Limit != default)
+            {
+                var skip = filter.Limit * (filter.Page - 1);
 
-            //reports.AddRange(fromReports);
+                reports = reports.Skip(skip).Take(filter.Limit);
+            }
 
-            return Ok(reports);
+            return Ok(await reports.AsNoTracking().ToListAsync());
         }
     }
 }

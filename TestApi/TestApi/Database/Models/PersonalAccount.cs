@@ -8,5 +8,6 @@
         public Currency Currency { get; set; }
         public int UserId { get; set; }
         public User User { get; set; }
+        public DateTime DateCreate { get; set; }
     }
 }
