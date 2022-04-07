@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TestApi.Database.Models;
+using TestApi.Dtos;
 using TestApi.Infrastructure.Exctension;
 using TestApi.Services.Contracts;
-using TestApi.ViewModels;
 
 namespace TestApi.Controllers
 {
@@ -38,7 +38,7 @@ namespace TestApi.Controllers
 
             if (personalAccount is null)
             {
-                return BadRequest("Ошибка создания лицевого счёта");
+                return BadRequest(Errors.FaildAccountCreate);
             }
 
             return Ok(personalAccount);
@@ -47,21 +47,21 @@ namespace TestApi.Controllers
         [HttpPost("topup")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PersonalAccount))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Convert([FromBody] TopUpModel topUpModel)
+        public async Task<IActionResult> TopUp([FromBody] TopUpModel topUpModel)
         {
             topUpModel.UserId = User.GetLoggedInUserId<int>();
             var account = await accountService.TopUp(topUpModel);
 
             if (account is null)
             {
-                return BadRequest("Ошибка пополнения счёта");
+                return BadRequest(Errors.FaildAccountTopUp);
             }
 
             return Ok(account);
         }
 
         [HttpPost("transfer")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Transfer([FromBody] TransferModel transfer)
         {
@@ -70,10 +70,10 @@ namespace TestApi.Controllers
 
             if (!transfered)
             {
-                return BadRequest("Ошибка перевода средств");
+                return BadRequest(Errors.FaildTransfer);
             }
 
-            return Ok();
+            return NoContent();
         }
 
         [HttpPost("convert")]
@@ -86,7 +86,7 @@ namespace TestApi.Controllers
 
             if (account is null)
             {
-                return BadRequest("Ошибка конвертации счёта");
+                return BadRequest(Errors.FaildAccountConvert);
             }
 
             return Ok(account);

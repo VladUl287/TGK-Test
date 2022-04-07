@@ -3,7 +3,7 @@
 namespace TestApi.Infrastructure.Attribute
 {
     [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
-    public class MinValueAttribute : ValidationAttribute
+    public sealed class MinValueAttribute : ValidationAttribute
     {
         private readonly int min;
 

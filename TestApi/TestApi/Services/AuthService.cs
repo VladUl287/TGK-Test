@@ -1,25 +1,27 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using TestApi.Database;
 using TestApi.Database.Models;
+using TestApi.Dtos;
+using TestApi.Infrastructure.Options;
 using TestApi.Services.Contracts;
-using TestApi.ViewModels;
 
 namespace TestApi.Services
 {
     public class AuthService : IAuthService
     {
         private readonly DatabaseContext dbContext;
-        private readonly IJwtService jwtService;
-        private readonly IConfiguration configuration;
+        private readonly PasswordOptions passwordOptions;
+        private readonly AuthOptions authOptions;
 
-        public AuthService(DatabaseContext dbContext, IJwtService tokenService, IConfiguration configuration)
+        public AuthService(DatabaseContext dbContext, IOptions<PasswordOptions> passwordOptions, IOptions<AuthOptions> authOptions)
         {
             this.dbContext = dbContext;
-            this.jwtService = tokenService;
-            this.configuration = configuration;
+            this.passwordOptions = passwordOptions.Value;
+            this.authOptions = authOptions.Value;
         }
 
-        public async Task<LoginSuccess?> Login(AuthModel login)
+        public async Task<AuthSuccess?> Login(AuthModel login)
         {
             var user = await dbContext.Users
                 .AsNoTracking()
@@ -30,7 +32,7 @@ namespace TestApi.Services
                 return null;
             }
 
-            var hashSecret = configuration.GetValue<string>("Hash:Secret");
+            var hashSecret = passwordOptions.HashSecret;
             var hashPassword = HashService.Hash(login.Password, hashSecret);
 
             if (user.Password != hashPassword)
@@ -38,23 +40,24 @@ namespace TestApi.Services
                 return null;
             }
 
-            var accessTokenKey = configuration.GetValue<string>("Token:AccessSecret");
-            var refreshTokenKey = configuration.GetValue<string>("Token:RefreshSecret");
-            var issuer = configuration.GetValue<string>("Token:Issuer");
-            var audience = configuration.GetValue<string>("Token:Audience");
-            var lifeTime = int.Parse(configuration.GetValue<string>("Token:LifeTime"));
+            var issuer = authOptions.Issuer;
+            var audience = authOptions.Audience;
+            var accessTokenKey = authOptions.AccessSecret;
+            var refreshTokenKey = authOptions.RefreshSecret;
+            var lifeTime = authOptions.LifeTime;
 
-            var accessToken = jwtService.Generate(user, accessTokenKey, issuer, audience, DateTime.UtcNow.AddSeconds(lifeTime));
-            var refreshToken = jwtService.Generate(user, refreshTokenKey, issuer, audience, DateTime.UtcNow.AddSeconds(lifeTime * 2));
+            var accessToken = JwtService.Generate(user, accessTokenKey, issuer, audience, DateTime.UtcNow.AddMinutes(lifeTime));
+            var refreshToken = JwtService.Generate(user, refreshTokenKey, issuer, audience, DateTime.UtcNow.AddDays(lifeTime));
 
-            await dbContext.Tokens.AddAsync(new Token
-            {
-                UserId = user.Id,
-                RefreshToken = refreshToken
-            });
+            await dbContext.Tokens.AddAsync(
+                new Token
+                {
+                    UserId = user.Id,
+                    RefreshToken = refreshToken
+                });
             await dbContext.SaveChangesAsync();
 
-            return new LoginSuccess
+            return new AuthSuccess
             {
                 Email = user.Email,
                 AccessToken = accessToken,
@@ -62,7 +65,7 @@ namespace TestApi.Services
             };
         }
 
-        public async Task<UserModel?> Register(AuthModel register)
+        public async Task<AuthSuccess?> Register(AuthModel register)
         {
             var exists = await dbContext.Users.AnyAsync(e => e.Email == register.Email);
 
@@ -71,8 +74,8 @@ namespace TestApi.Services
                 return null;
             }
 
-            var key = configuration.GetValue<string>("Hash:Secret");
-            var hashPassword = HashService.Hash(register.Password, key);
+            var hashSecret = passwordOptions.HashSecret;
+            var hashPassword = HashService.Hash(register.Password, hashSecret);
 
             var user = new User
             {
@@ -83,9 +86,8 @@ namespace TestApi.Services
             await dbContext.Users.AddAsync(user);
             await dbContext.SaveChangesAsync();
 
-            return new UserModel
+            return new AuthSuccess
             {
-                Id = user.Id,
                 Email = user.Email
             };
         }
@@ -105,7 +107,7 @@ namespace TestApi.Services
             await dbContext.SaveChangesAsync();
         }
 
-        public async Task<LoginSuccess?> Refresh(string token)
+        public async Task<AuthSuccess?> Refresh(string token)
         {
             if (string.IsNullOrEmpty(token))
             {
@@ -122,33 +124,34 @@ namespace TestApi.Services
                 return null;
             }
 
-            var accessSecretKey = configuration.GetValue<string>("Token:AccessSecret");
-            var refreshSecretKey = configuration.GetValue<string>("Token:RefreshSecret");
-            var issuer = configuration.GetValue<string>("Token:Issuer");
-            var audience = configuration.GetValue<string>("Token:Audience");
-            var lifeTime = int.Parse(configuration.GetValue<string>("Token:LifeTime"));
+            var issuer = authOptions.Issuer;
+            var audience = authOptions.Audience;
+            var accessTokenKey = authOptions.AccessSecret;
+            var refreshTokenKey = authOptions.RefreshSecret;
+            var lifeTime = authOptions.LifeTime;
 
-            var valid = jwtService.ValidateToken(dbToken.RefreshToken, refreshSecretKey, issuer, audience);
+            var valid = JwtService.ValidateToken(dbToken.RefreshToken, refreshTokenKey, issuer, audience);
 
             if (!valid)
             {
-                await Logout(dbToken.RefreshToken);
+                dbContext.Tokens.Remove(dbToken);
+                await dbContext.SaveChangesAsync();
 
                 return null;
             }
 
-            var accessToken = jwtService.Generate(dbToken.User, accessSecretKey, issuer, audience, DateTime.UtcNow.AddSeconds(lifeTime));
-            var refreshToken = jwtService.Generate(dbToken.User, refreshSecretKey, issuer, audience, DateTime.UtcNow.AddSeconds(lifeTime * 2));
+            var accessToken = JwtService.Generate(dbToken.User, accessTokenKey, issuer, audience, DateTime.UtcNow.AddMinutes(lifeTime));
+            var refreshToken = JwtService.Generate(dbToken.User, refreshTokenKey, issuer, audience, DateTime.UtcNow.AddDays(lifeTime));
 
             dbToken.RefreshToken = refreshToken;
             dbContext.Tokens.Update(dbToken);
             await dbContext.SaveChangesAsync();
 
-            return new LoginSuccess 
+            return new AuthSuccess
             {
                 Email = dbToken.User.Email,
-                AccessToken = accessToken, 
-                RefreshToken = refreshToken 
+                AccessToken = accessToken,
+                RefreshToken = refreshToken
             };
         }
     }

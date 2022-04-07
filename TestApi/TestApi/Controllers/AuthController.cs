@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TestApi.Dtos;
 using TestApi.Services.Contracts;
-using TestApi.ViewModels;
 
 namespace TestApi.Controllers
 {
@@ -17,7 +17,7 @@ namespace TestApi.Controllers
         }
 
         [HttpPost("login")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserModel))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AuthSuccess))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Login([FromForm] AuthModel login)
         {
@@ -25,7 +25,7 @@ namespace TestApi.Controllers
 
             if (loginResult is null)
             {
-                return BadRequest("Неверные email или пароль.");
+                return BadRequest(Errors.NotCorrectEmailOrPassword);
             }
 
             Response.Cookies.Append(REFRESH_TOKEN, loginResult.RefreshToken, new CookieOptions
@@ -37,18 +37,18 @@ namespace TestApi.Controllers
         }
 
         [HttpPost("register")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserModel))]
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(AuthSuccess))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Register([FromForm] AuthModel register)
         {
-            var user = await authService.Register(register);
+            var auth = await authService.Register(register);
 
-            if (user is null)
+            if (auth is null)
             {
-                return BadRequest("Пользователь с таким email уже существует.");
+                return BadRequest(Errors.UserAlreadyExists);
             }
 
-            return Created("Register", new { user.Id });
+            return Created("Register", auth);
         }
 
         [HttpPost("logout")]
@@ -57,7 +57,7 @@ namespace TestApi.Controllers
         {
             var refreshToken = Request.Cookies[REFRESH_TOKEN];
 
-            if (refreshToken is not null)
+            if (!string.IsNullOrEmpty(refreshToken))
             {
                 await authService.Logout(refreshToken);
 
@@ -68,6 +68,8 @@ namespace TestApi.Controllers
         }
 
         [HttpPost("refresh")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AuthSuccess))]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Refresh()
         {
             var cookieToken = Request.Cookies[REFRESH_TOKEN];

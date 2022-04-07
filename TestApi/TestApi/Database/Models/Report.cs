@@ -9,6 +9,7 @@
         public PersonalAccount PersonalAccount { get; set; }
         public decimal TransferValue { get; set; }
         public decimal AccountValue { get; set; }
+        public int AccountCurrencyId { get; set; }
         public int CurrencyId { get; set; }
         public Currency Currency { get; set; }
         public bool Credited { get; set; }

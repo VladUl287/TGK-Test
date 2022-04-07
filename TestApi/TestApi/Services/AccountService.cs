@@ -2,8 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using TestApi.Database;
 using TestApi.Database.Models;
+using TestApi.Dtos;
 using TestApi.Services.Contracts;
-using TestApi.ViewModels;
 
 namespace TestApi.Services
 {
@@ -63,23 +63,51 @@ namespace TestApi.Services
                 return null;
             }
 
-            account.Value += topUpModel.Value;
-            await dbContext.SaveChangesAsync();
-
-            var report = new Report
+            if (account.CurrencyId != topUpModel.CurrencyId)
             {
-                UserId = account.UserId,
-                PersonalAccountId = account.Number,
-                TransferValue = topUpModel.Value,
-                AccountValue = account.Value,
-                CurrencyId = account.CurrencyId,
-                DateTransfer = DateTime.UtcNow
-            };
+                var rate = await dbContext.ExchangeRates
+                    .Where(e => e.CurrencyId == account.CurrencyId && e.SecondCurrencyId == topUpModel.CurrencyId)
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync();
 
-            await dbContext.Reports.AddRangeAsync(report);
-            await dbContext.SaveChangesAsync();
+                if (rate is null)
+                {
+                    return null;
+                }
 
-            return account;
+                topUpModel.Value = rate.Exchange(topUpModel.Value);
+            }
+
+            using var transaction = await dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                account.Value += topUpModel.Value;
+                await dbContext.SaveChangesAsync();
+
+                var report = new Report
+                {
+                    UserId = account.UserId,
+                    PersonalAccountId = account.Number,
+                    TransferValue = topUpModel.Value,
+                    AccountValue = account.Value,
+                    Credited = true,
+                    AccountCurrencyId = account.CurrencyId,
+                    CurrencyId = topUpModel.CurrencyId,
+                    DateTransfer = DateTime.UtcNow
+                };
+
+                await dbContext.Reports.AddAsync(report);
+                await dbContext.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+
+                return account;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                return null;
+            }
         }
 
         public async Task<bool> Transfer(TransferModel transferModel)
@@ -93,8 +121,12 @@ namespace TestApi.Services
 
                 if (toAccount is not null)
                 {
-                    using var transaction = await dbContext.Database.BeginTransactionAsync();
+                    if (account.Number == toAccount.Number)
+                    {
+                        return false;
+                    }
 
+                    using var transaction = await dbContext.Database.BeginTransactionAsync();
                     try
                     {
                         var value = transferModel.Value;
@@ -104,13 +136,15 @@ namespace TestApi.Services
                         {
                             var rate = await dbContext.ExchangeRates
                                 .Where(e => e.CurrencyId == account.CurrencyId && e.SecondCurrencyId == toAccount.CurrencyId)
-                                .Select(e => e.Rate)
+                                .AsNoTracking()
                                 .FirstOrDefaultAsync();
 
-                            if (rate != default)
+                            if (rate is null)
                             {
-                                value *= rate;
+                                throw new DbUpdateException();
                             }
+
+                            value = rate.Exchange(value);
                         }
 
                         toAccount.Value += value;
@@ -122,6 +156,7 @@ namespace TestApi.Services
                             PersonalAccountId = account.Number,
                             TransferValue = transferModel.Value,
                             AccountValue = account.Value,
+                            AccountCurrencyId = account.CurrencyId,
                             CurrencyId = account.CurrencyId,
                             DateTransfer = DateTime.UtcNow
                         };
@@ -132,6 +167,7 @@ namespace TestApi.Services
                             TransferValue = transferModel.Value,
                             AccountValue = toAccount.Value,
                             Credited = true,
+                            AccountCurrencyId = toAccount.CurrencyId,
                             CurrencyId = account.CurrencyId,
                             DateTransfer = DateTime.UtcNow
                         };
@@ -139,17 +175,16 @@ namespace TestApi.Services
                         await dbContext.Reports.AddRangeAsync(fromUserReport, toUserReport);
                         await dbContext.SaveChangesAsync();
 
-                        await dbContext.Database.CommitTransactionAsync();
+                        await transaction.CommitAsync();
 
                         return true;
                     }
                     catch (DbUpdateException)
                     {
-                        await dbContext.Database.RollbackTransactionAsync();
+                        await transaction.RollbackAsync();
                     }
                 }
             }
-
             return false;
         }
 
@@ -165,12 +200,12 @@ namespace TestApi.Services
 
             var rate = await dbContext.ExchangeRates
                 .Where(e => e.CurrencyId == account.CurrencyId && e.SecondCurrencyId == convertModel.CurrencyId)
-                .Select(e => e.Rate)
+                .AsNoTracking()
                 .FirstOrDefaultAsync();
 
-            if (rate != default)
+            if (rate is not null)
             {
-                account.Value *= rate;
+                account.Value = rate.Exchange(account.Value);
                 account.CurrencyId = convertModel.CurrencyId;
 
                 await dbContext.SaveChangesAsync();

@@ -1,12 +1,15 @@
-﻿using TestApi.ViewModels;
+﻿using TestApi.Dtos;
 
 namespace TestApi.Services.Contracts
 {
     public interface IAuthService
     {
-        Task<LoginSuccess?> Login(AuthModel login);
-        Task<UserModel?> Register(AuthModel register);
+        Task<AuthSuccess?> Login(AuthModel login);
+
+        Task<AuthSuccess?> Register(AuthModel register);
+
         Task Logout(string token);
-        Task<LoginSuccess?> Refresh(string token);
+
+        Task<AuthSuccess?> Refresh(string token);
     }
 }

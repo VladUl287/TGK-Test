@@ -35,8 +35,17 @@
               type="submit"
               class="btn btn-primary w-50"
               :disabled="v$.form.$invalid"
+              v-if="!loading"
             >
               Войти
+            </button>
+            <button type="button" class="btn btn-primary" disabled v-else>
+              <span
+                class="spinner-grow spinner-grow-sm"
+                role="status"
+                aria-hidden="true"
+              ></span>
+              Загрузка...
             </button>
           </div>
           <div class="col-md-12">
@@ -49,6 +58,9 @@
             </div>
           </div>
         </form>
+        <div class="alert alert-danger" role="alert" v-if="result">
+          {{ result }}
+        </div>
       </div>
     </div>
   </div>
@@ -72,18 +84,26 @@ export default {
       password: "",
     });
 
+    const result = ref(null);
+    const loading = ref(false);
+
     const submit = async () => {
       try {
+        loading.value = true;
         await store.dispatch("Login", form.value);
         router.push("/");
       } catch (error) {
-        alert("Неверный логин или пароль." + error);
+        result.value = error.response.data.message;
+      } finally {
+        loading.value = false;
       }
     };
 
     return {
       v$,
       form,
+      result,
+      loading,
       submit,
     };
   },

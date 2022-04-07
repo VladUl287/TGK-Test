@@ -1,7 +1,6 @@
-﻿
-namespace TestApi.ViewModels
+﻿namespace TestApi.Dtos
 {
-    public class LoginSuccess
+    public class AuthSuccess
     {
         public string Email { get; set; } = string.Empty;
         public string AccessToken { get; set; } = string.Empty;

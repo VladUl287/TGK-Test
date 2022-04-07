@@ -1,12 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import store from '../store';
-import HomeView from '../views/HomeView.vue'
-import RegisterView from '../views/RegisterView.vue'
-import LoginView from '../views/LoginView.vue'
-import TransferView from '../views/TransferView.vue'
-import ReportView from '../views/ReportView.vue'
-import TopUpView from '../views/TopUpView.vue'
-import ConvertAccountView from '../views/ConvertAccountView.vue'
+import store from '@/store';
+import HomeView from '@/views/HomeView.vue'
+import TransferView from '@/views/TransferView.vue'
+import ReportView from '@/views/ReportView.vue'
+import TopUpView from '@/views/TopUpView.vue'
+import ConvertAccountView from '@/views/ConvertAccountView.vue'
+
+const LoginView = () => import('@/views/LoginView');
+const RegisterView = () => import('@/views/RegisterView');
 
 const routes = [
   {
@@ -14,18 +15,6 @@ const routes = [
     name: 'Home',
     component: HomeView,
     meta: { requiresAuth: true }
-  },
-  {
-    path: '/register',
-    name: "Register",
-    component: RegisterView,
-    meta: { guest: true },
-  },
-  {
-    path: '/login',
-    name: "Login",
-    component: LoginView,
-    meta: { guest: true },
   },
   {
     path: '/transfer/:id',
@@ -50,7 +39,19 @@ const routes = [
     name: "Reports",
     component: ReportView,
     meta: { requiresAuth: true },
-  }
+  },
+  {
+    path: '/register',
+    name: "Register",
+    component: RegisterView,
+    meta: { guest: true },
+  },
+  {
+    path: '/login',
+    name: "Login",
+    component: LoginView,
+    meta: { guest: true },
+  },
 ]
 
 const router = createRouter({
@@ -58,7 +59,7 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (store.getters.isAuthenticated) {
       next()
@@ -70,7 +71,7 @@ router.beforeEach((to, from, next) => {
   }
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _, next) => {
   if (to.matched.some((record) => record.meta.guest)) {
     if (store.getters.isAuthenticated) {
       next("/");

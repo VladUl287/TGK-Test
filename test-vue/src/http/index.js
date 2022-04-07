@@ -16,14 +16,18 @@ instance.interceptors.request.use((config) => {
     return config;
 });
 
+let refresh = false;
 instance.interceptors.response.use(undefined, async (error) => {
-    if (error.response.status === 401 && error.config && !error.config._isRetry) {
+    if (error.response.status === 401 && error.config && !refresh) {
+        refresh = true;
         try {
             await store.dispatch('Refresh');
             return instance.request(error.config);
         } catch {
-            await store.dispatch('Refresh');
+            await store.dispatch('Logout');
             router.push('/login');
+        } finally {
+            refresh = false;
         }
     }
     return Promise.reject(error);

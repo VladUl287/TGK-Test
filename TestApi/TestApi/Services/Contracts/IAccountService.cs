@@ -1,5 +1,5 @@
 ﻿using TestApi.Database.Models;
-using TestApi.ViewModels;
+using TestApi.Dtos;
 
 namespace TestApi.Services.Contracts
 {

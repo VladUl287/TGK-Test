@@ -6,8 +6,10 @@ namespace TestApi.Infrastructure.Exctension
     {
         public static T GetLoggedInUserId<T>(this ClaimsPrincipal principal)
         {
-            if (principal == null)
+            if (principal is null)
+            {
                 throw new ArgumentNullException(nameof(principal));
+            }
 
             var loggedInUserId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
 

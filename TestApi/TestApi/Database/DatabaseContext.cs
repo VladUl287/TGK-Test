@@ -7,7 +7,6 @@ namespace TestApi.Database
     {
         public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
         {
-            //Database.EnsureDeleted();
             Database.EnsureCreated();
         }
 
@@ -21,7 +20,6 @@ namespace TestApi.Database
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             var accoindId = Guid.NewGuid();
-            var secAccoindId = Guid.NewGuid();
 
             modelBuilder.Entity<User>(entity =>
             {
@@ -38,9 +36,16 @@ namespace TestApi.Database
                 entity.HasData(new User
                 {
                     Id = 1,
-                    Email = "e@mail.ru",
-                    Password = "rqhdJQb/Oi7AvOFUJsnFlo99n6F7ct0B+Sgudw7kNMM="
+                    Email = "email@mail.ru",
+                    Password = "rqhdJQb/Oi7AvOFUJsnFlo99n6F7ct0B+Sgudw7kNMM=" //123456
                 });
+            });
+
+            modelBuilder.Entity<Token>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasIndex(e => e.RefreshToken);
             });
 
             modelBuilder.Entity<PersonalAccount>(entity =>
@@ -59,13 +64,6 @@ namespace TestApi.Database
                         UserId = 1,
                         CurrencyId = 1,
                         Value = 2000
-                    },
-                    new PersonalAccount
-                    {
-                        Number = secAccoindId,
-                        UserId = 1,
-                        CurrencyId = 2,
-                        Value = 5000
                     }
                 });
             });
@@ -122,6 +120,7 @@ namespace TestApi.Database
                         TransferValue = 235,
                         AccountValue = 2235,
                         DateTransfer = DateTime.UtcNow.AddMinutes(15),
+                        AccountCurrencyId = 1,
                         CurrencyId = 1,
                         Credited = true,
                         PersonalAccountId = accoindId,
@@ -133,7 +132,8 @@ namespace TestApi.Database
                         TransferValue = 235,
                         AccountValue = 2000,
                         DateTransfer = DateTime.UtcNow.AddDays(5),
-                        CurrencyId = 2,
+                        AccountCurrencyId = 1,
+                        CurrencyId = 1,
                         PersonalAccountId = accoindId,
                         UserId = 1
                     },
@@ -143,6 +143,7 @@ namespace TestApi.Database
                         TransferValue = 45,
                         AccountValue = 2045,
                         DateTransfer = DateTime.UtcNow.AddDays(10),
+                        AccountCurrencyId = 1,
                         CurrencyId = 1,
                         Credited = true,
                         PersonalAccountId = accoindId,
@@ -154,7 +155,8 @@ namespace TestApi.Database
                         TransferValue = 1500,
                         AccountValue = 545,
                         DateTransfer = DateTime.UtcNow.AddDays(15),
-                        CurrencyId = 2,
+                        AccountCurrencyId = 1,
+                        CurrencyId = 1,
                         PersonalAccountId = accoindId,
                         UserId = 1
                     },
@@ -164,7 +166,8 @@ namespace TestApi.Database
                         TransferValue = 5600,
                         AccountValue = 6045,
                         DateTransfer = DateTime.UtcNow.AddDays(20),
-                        CurrencyId = 2,
+                        AccountCurrencyId = 1,
+                        CurrencyId = 1,
                         Credited = true,
                         PersonalAccountId = accoindId,
                         UserId = 1
@@ -175,7 +178,8 @@ namespace TestApi.Database
                         TransferValue = 435,
                         AccountValue = 5610,
                         DateTransfer = DateTime.UtcNow.AddDays(25),
-                        CurrencyId = 2,
+                        AccountCurrencyId = 1,
+                        CurrencyId = 1,
                         PersonalAccountId = accoindId,
                         UserId = 1
                     },
@@ -193,7 +197,6 @@ namespace TestApi.Database
                         Id = 1,
                         CurrencyId = 1,
                         SecondCurrencyId = 2,
-                        //Rate = 0.012M
                         Rate = 0.5M
                     },
                     new ExchangeRate
@@ -201,7 +204,6 @@ namespace TestApi.Database
                         Id = 2,
                         CurrencyId = 2,
                         SecondCurrencyId = 1,
-                        //Rate = 83.3333333M
                         Rate = 2M
                     }
                 });

@@ -7,38 +7,14 @@
       @submit="createAccount"
     />
 
-    <div class="card mb-2" v-for="account of accounts" :key="account.number">
-      <h5 class="card-header">Номер счёта: {{ account.number }}</h5>
-      <div class="card-body">
-        <h5 class="card-title mb-3">
-          Баланс: {{ account.value }} {{ account.currency.sign }}
-        </h5>
-        <router-link
-          :to="{ name: 'TopUp', params: { id: account.number } }"
-          class="btn btn-primary"
-        >
-          Пополнить
-        </router-link>
-        <router-link
-          :to="{ name: 'Transfer', params: { id: account.number } }"
-          class="btn btn-success mx-2"
-        >
-          Перевести
-        </router-link>
-        <router-link
-          :to="{ name: 'Convert', params: { id: account.number } }"
-          class="btn btn-primary"
-        >
-          Конвертировать
-        </router-link>
-      </div>
-    </div>
+    <AccountCardList :accounts="accounts" />
   </div>
 </template>
 <script>
 import { useStore } from "vuex";
 import { computed, onMounted } from "@vue/runtime-core";
 import ModalWindow from "@/components/ModalWindow.vue";
+import AccountCardList from "@/components/AccountCardList.vue";
 export default {
   setup() {
     const store = useStore();
@@ -64,6 +40,7 @@ export default {
   },
   components: {
     ModalWindow,
+    AccountCardList,
   },
 };
 </script>

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace TestApi.ViewModels
+namespace TestApi.Dtos
 {
     public class AuthModel
     {

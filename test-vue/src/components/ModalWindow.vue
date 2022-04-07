@@ -6,7 +6,7 @@
       data-bs-toggle="modal"
       v-bind:data-bs-target="'#' + id"
     >
-      {{header}}
+      {{ header }}
     </button>
 
     <div
@@ -20,7 +20,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="exampleModalLabel">
-              {{header}}
+              {{ header }}
             </h5>
             <button
               type="button"
@@ -32,6 +32,7 @@
           <div class="modal-body">
             <form>
               <div class="form-group">
+                <label>Сумма</label>
                 <input
                   type="number"
                   class="form-control"
@@ -41,6 +42,7 @@
               </div>
 
               <div class="form-group mt-2">
+                <label>Валюта</label>
                 <select class="form-select" v-model="form.currencyId">
                   <option
                     v-for="currency of currencies"
@@ -61,12 +63,8 @@
             >
               Закрыть
             </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              @click="submit"
-            >
-              {{header}}
+            <button type="button" class="btn btn-primary" @click="submit">
+              {{ header }}
             </button>
           </div>
         </div>
@@ -81,15 +79,15 @@ export default {
   props: {
     id: {
       type: String,
-      required: true
+      required: true,
     },
     header: {
       type: String,
-      required: true
+      required: true,
     },
     currencies: {
       type: Array,
-      required: true
+      required: true,
     },
   },
   setup(_, { emit }) {

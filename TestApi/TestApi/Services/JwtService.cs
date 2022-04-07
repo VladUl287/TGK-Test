@@ -3,13 +3,12 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using TestApi.Database.Models;
-using TestApi.Services.Contracts;
 
 namespace TestApi.Services
 {
-    public class JwtService : IJwtService
+    public class JwtService
     {
-        public string Generate(User user, string key, string issuer, string audience, DateTime expires)
+        public static string Generate(User user, string key, string issuer, string audience, DateTime expires)
         {
             var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
 
@@ -21,16 +20,16 @@ namespace TestApi.Services
             };
 
             var securityToken = new JwtSecurityToken(
-                issuer, 
-                audience, 
+                issuer,
+                audience,
                 claims,
-                expires: expires, 
+                expires: expires,
                 signingCredentials: credentialsAccess);
 
             return new JwtSecurityTokenHandler().WriteToken(securityToken);
         }
 
-        public bool ValidateToken(string token, string key, string issuer, string audience)
+        public static bool ValidateToken(string token, string key, string issuer, string audience)
         {
             var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
             var tokenHandler = new JwtSecurityTokenHandler();

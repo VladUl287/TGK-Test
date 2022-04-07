@@ -8,28 +8,28 @@ const state = {
 
 const getters = {
     isAuthenticated: state => !!state.access_token,
-    StateUser: state => state.user,
+    StateUser: state => state.email,
     StateToken: state => state.access_token,
 };
 
 const actions = {
     async Register(_, form) {
         var user = getFormData(form);
-
         await instance.post('auth/register', user)
     },
     async Login({ commit }, form) {
         var user = getFormData(form);
-        
         let result = await instance.post('auth/login', user);
         await commit('setAuth', result.data);
     },
     async Logout({ commit }) {
-        await instance.post('auth/logout')
         await commit('logout')
+        await instance.post('auth/logout')
     },
     async Refresh({ commit }) {
-        let result = await axios.post('auth/refresh');
+        let result = await axios.post(instance.defaults.baseURL + 'auth/refresh', {}, {
+            withCredentials: true
+        });
         await commit('setAuth', result.data);
     }
 };
@@ -40,7 +40,7 @@ const mutations = {
         state.access_token = data.accessToken
     },
     logout(state) {
-        state.user = null
+        state.email = null
         state.access_token = null
     },
 };

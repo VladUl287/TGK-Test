@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using TestApi.Database;
+using TestApi.Infrastructure.Options;
 using TestApi.Services;
 using TestApi.Services.Contracts;
 
@@ -13,14 +14,20 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors();
 builder.Services.AddControllers();
 builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddMemoryCache();
+
 builder.Services.AddDbContext<DatabaseContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-var issuer = builder.Configuration["Token:Issuer"];
-var audience = builder.Configuration["Token:Audience"];
-var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Token:AccessSecret"]));
+builder.Services.Configure<AuthOptions>(builder.Configuration.GetSection(AuthOptions.Position));
+builder.Services.Configure<PasswordOptions>(builder.Configuration.GetSection(PasswordOptions.Position));
+
+var issuer = builder.Configuration["Auth:Issuer"];
+var audience = builder.Configuration["Auth:Audience"];
+var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Auth:AccessSecret"]));
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
   .AddJwtBearer(options =>
   {
@@ -39,7 +46,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
   });
 
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 
 builder.Services.AddEndpointsApiExplorer();
@@ -69,7 +76,6 @@ builder.Services.AddSwaggerGen(opt =>
 });
 
 var app = builder.Build();
-//AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 if (app.Environment.IsDevelopment())
 {

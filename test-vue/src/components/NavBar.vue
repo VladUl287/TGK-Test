@@ -46,7 +46,7 @@
         data-bs-toggle="dropdown"
         aria-expanded="false"
       >
-        <strong>email@mail.ru</strong>
+        <strong>{{email}}</strong>
       </span>
       <ul
         class="dropdown-menu text-small shadow"
@@ -61,12 +61,15 @@
 </template>
 
 <script>
-import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
+import { computed } from "@vue/runtime-core";
+import { useRouter } from "vue-router";
+import { useStore } from "vuex";
 export default {
   setup() {
     const store = useStore();
     const router = useRouter();
+
+    const email = computed(() => store.getters.StateUser);
 
     const logout = async () => {
       await store.dispatch("Logout");
@@ -74,6 +77,7 @@ export default {
     };
 
     return {
+      email,
       logout,
     };
   },

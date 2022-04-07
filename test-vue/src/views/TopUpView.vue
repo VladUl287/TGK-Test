@@ -23,6 +23,18 @@
         />
       </div>
       <div class="form-group">
+        <label>Валюта</label>
+        <select class="form-select" v-model="form.currencyId">
+          <option
+            v-for="(currency, index) in currencies"
+            :key="index"
+            :value="currency.id"
+          >
+            <p>{{ currency.name }}</p>
+          </option>
+        </select>
+      </div>
+      <div class="form-group">
         <button type="submit" class="btn btn-success d-block mt-2">
           Пополнить
         </button>
@@ -55,15 +67,18 @@ export default {
 
     const form = ref({
       accountNumber: "",
+      currencyId: 0,
       value: 0,
     });
     const errors = ref([]);
 
     const accounts = computed(() => store.getters.StateAccounts);
+    const currencies = computed(() => store.getters.StateCurrencies);
 
     onMounted(async () => {
       form.value.accountNumber = route.params.id;
       await store.dispatch("GetAccounts");
+      await store.dispatch("GetCurrencies");
     });
 
     const topUpAccount = async () => {
@@ -80,6 +95,7 @@ export default {
       form,
       errors,
       accounts,
+      currencies,
       topUpAccount,
     };
   },

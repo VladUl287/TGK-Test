@@ -35,8 +35,17 @@
               type="submit"
               class="btn btn-primary w-50"
               :disabled="v$.form.$invalid"
+              v-if="!loading"
             >
               Зарегистрироваться
+            </button>
+            <button class="btn btn-primary" type="button" disabled v-else>
+              <span
+                class="spinner-grow spinner-grow-sm"
+                role="status"
+                aria-hidden="true"
+              ></span>
+              Загрузка...
             </button>
           </div>
           <div class="col-md-12">
@@ -49,6 +58,9 @@
             </div>
           </div>
         </form>
+        <div class="alert alert-danger" role="alert" v-if="result">
+          {{ result }}
+        </div>
       </div>
     </div>
   </div>
@@ -57,9 +69,9 @@
 <script>
 import useVuelidate from "@vuelidate/core";
 import { required, email, minLength } from "@vuelidate/validators";
-import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
-import { ref } from '@vue/reactivity';
+import { useRouter } from "vue-router";
+import { useStore } from "vuex";
+import { ref } from "@vue/reactivity";
 
 export default {
   setup() {
@@ -72,18 +84,26 @@ export default {
       password: "",
     });
 
+    const result = ref(null);
+    const loading = ref(false);
+
     const submit = async () => {
       try {
+        loading.value = true;
         await store.dispatch("Register", form.value);
         router.push("/login");
       } catch (error) {
-        alert("Ошибка регистрации.");
+        result.value = error.response.data.message;
+      } finally {
+        loading.value = false;
       }
     };
 
     return {
       v$,
       form,
+      result,
+      loading,
       submit,
     };
   },

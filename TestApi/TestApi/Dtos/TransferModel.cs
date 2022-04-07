@@ -1,7 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using TestApi.Infrastructure.Attribute;
 
-namespace TestApi.ViewModels
+namespace TestApi.Dtos
 {
     public class TransferModel
     {
@@ -15,6 +16,7 @@ namespace TestApi.ViewModels
         public Guid ToAccountNumber { get; set; }
 
         [Required]
+        [MinValue(0)]
         public decimal Value { get; set; }
     }
 }
