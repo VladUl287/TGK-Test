@@ -26,6 +26,7 @@
         <label>Сумма</label>
         <input
           type="number"
+          step="any"
           name="value"
           class="form-control"
           v-model="form.value"

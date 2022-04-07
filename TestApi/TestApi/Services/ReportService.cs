@@ -23,7 +23,10 @@ namespace TestApi.Services
 
             reports = SetFilters(filter, reports);
 
-            return await reports.AsNoTracking().ToListAsync();
+            return await reports
+                .AsNoTracking()
+                .OrderBy(e => e.DateTransfer)
+                .ToListAsync();
         }
 
         private static IQueryable<Report> SetFilters(FilterModel filter, IQueryable<Report> reports)
