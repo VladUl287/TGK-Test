@@ -13,7 +13,7 @@
       </select>
     </div>
     <div class="mb-2">
-      <label>Валюта счёта</label>
+      <label>Валюта</label>
       <select class="form-select" v-model="filter.currencyId">
         <option
           v-for="(currency, index) in currencies"

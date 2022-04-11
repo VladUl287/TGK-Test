@@ -10,7 +10,7 @@
       />
     </div>
     <div v-if="!isGraphic">
-      <div class="card mb-2" v-for="report of reports.slice().reverse()" :key="report.id">
+      <div class="card mb-2" v-for="report of reports" :key="report.id">
         <ReportCard :report="report" :format_date="format_date" />
       </div>
     </div>

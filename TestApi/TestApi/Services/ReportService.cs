@@ -45,7 +45,7 @@ namespace TestApi.Services
             }
             if (filter.CurrencyId != default)
             {
-                reports = reports.Where(e => e.AccountCurrencyId == filter.CurrencyId);
+                reports = reports.Where(e => e.CurrencyId == filter.CurrencyId);
             }
             if (filter.Page != default && filter.Limit != default)
             {

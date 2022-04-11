@@ -17,7 +17,7 @@
         <label>Валюта</label>
         <select class="form-select" v-model="form.currencyId">
           <option
-            v-for="(currency, index) in cirrencies"
+            v-for="(currency, index) in filteredCurrencies"
             :key="index"
             :value="currency.id"
           >
@@ -63,12 +63,30 @@ export default {
     const errors = ref([]);
 
     const accounts = computed(() => store.getters.StateAccounts);
-    const cirrencies = computed(() => store.getters.StateCurrencies);
+    const currencies = computed(() => store.getters.StateCurrencies);
+    const filteredCurrencies = ref([]);
+    let setup = false;
+
+    const setupCurrencies = () => {
+      if (!setup) {
+        let account = accounts.value.find(
+          (x) => x.number === form.value.accountNumber
+        );
+        if (account) {
+          filteredCurrencies.value = currencies.value.filter(
+            (e) => e.id !== account.currencyId
+          );
+          setup = true;
+        }
+      }
+    };
 
     onMounted(async () => {
       form.value.accountNumber = route.params.id;
+      setupCurrencies();
       await store.dispatch("GetAccounts");
       await store.dispatch("GetCurrencies");
+      setupCurrencies();
     });
 
     const convertAccount = async () => {
@@ -85,7 +103,7 @@ export default {
       form,
       errors,
       accounts,
-      cirrencies,
+      filteredCurrencies,
       convertAccount,
     };
   },

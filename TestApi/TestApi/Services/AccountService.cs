@@ -23,6 +23,7 @@ namespace TestApi.Services
             return await dbContext.PersonalAccounts
                 .Include(e => e.Currency)
                 .Where(e => e.UserId == userId)
+                .OrderBy(e => e.DateCreate)
                 .AsNoTracking()
                 .ToListAsync();
         }
@@ -91,7 +92,6 @@ namespace TestApi.Services
                     TransferValue = topUpModel.Value,
                     AccountValue = account.Value,
                     Credited = true,
-                    AccountCurrencyId = account.CurrencyId,
                     CurrencyId = topUpModel.CurrencyId,
                     DateTransfer = DateTime.UtcNow
                 };
@@ -156,7 +156,6 @@ namespace TestApi.Services
                             PersonalAccountId = account.Number,
                             TransferValue = transferModel.Value,
                             AccountValue = account.Value,
-                            AccountCurrencyId = account.CurrencyId,
                             CurrencyId = account.CurrencyId,
                             DateTransfer = DateTime.UtcNow
                         };
@@ -167,7 +166,6 @@ namespace TestApi.Services
                             TransferValue = transferModel.Value,
                             AccountValue = toAccount.Value,
                             Credited = true,
-                            AccountCurrencyId = toAccount.CurrencyId,
                             CurrencyId = account.CurrencyId,
                             DateTransfer = DateTime.UtcNow
                         };

@@ -7,6 +7,7 @@ namespace TestApi.Database
     {
         public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
         {
+            //Database.EnsureDeleted();
             Database.EnsureCreated();
         }
 
@@ -119,8 +120,7 @@ namespace TestApi.Database
                         Id = 1,
                         TransferValue = 235,
                         AccountValue = 2235,
-                        DateTransfer = DateTime.UtcNow.AddMinutes(15),
-                        AccountCurrencyId = 1,
+                        DateTransfer = DateTime.UtcNow.AddDays(-25),
                         CurrencyId = 1,
                         Credited = true,
                         PersonalAccountId = accoindId,
@@ -131,8 +131,7 @@ namespace TestApi.Database
                         Id = 2,
                         TransferValue = 235,
                         AccountValue = 2000,
-                        DateTransfer = DateTime.UtcNow.AddDays(5),
-                        AccountCurrencyId = 1,
+                        DateTransfer = DateTime.UtcNow.AddDays(-20),
                         CurrencyId = 1,
                         PersonalAccountId = accoindId,
                         UserId = 1
@@ -142,8 +141,7 @@ namespace TestApi.Database
                         Id = 3,
                         TransferValue = 45,
                         AccountValue = 2045,
-                        DateTransfer = DateTime.UtcNow.AddDays(10),
-                        AccountCurrencyId = 1,
+                        DateTransfer = DateTime.UtcNow.AddDays(-15),
                         CurrencyId = 1,
                         Credited = true,
                         PersonalAccountId = accoindId,
@@ -154,8 +152,7 @@ namespace TestApi.Database
                         Id = 4,
                         TransferValue = 1500,
                         AccountValue = 545,
-                        DateTransfer = DateTime.UtcNow.AddDays(15),
-                        AccountCurrencyId = 1,
+                        DateTransfer = DateTime.UtcNow.AddDays(-10),
                         CurrencyId = 1,
                         PersonalAccountId = accoindId,
                         UserId = 1
@@ -165,8 +162,7 @@ namespace TestApi.Database
                         Id = 5,
                         TransferValue = 5600,
                         AccountValue = 6045,
-                        DateTransfer = DateTime.UtcNow.AddDays(20),
-                        AccountCurrencyId = 1,
+                        DateTransfer = DateTime.UtcNow.AddDays(-5),
                         CurrencyId = 1,
                         Credited = true,
                         PersonalAccountId = accoindId,
@@ -177,8 +173,7 @@ namespace TestApi.Database
                         Id = 6,
                         TransferValue = 435,
                         AccountValue = 5610,
-                        DateTransfer = DateTime.UtcNow.AddDays(25),
-                        AccountCurrencyId = 1,
+                        DateTransfer = DateTime.UtcNow.AddDays(-1),
                         CurrencyId = 1,
                         PersonalAccountId = accoindId,
                         UserId = 1
